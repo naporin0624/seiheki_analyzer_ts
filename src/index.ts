@@ -1,8 +1,17 @@
-import { writeFileSync, mkdirSync } from "fs";
+import { writeFileSync, mkdirSync, statSync } from "fs";
 import { JSDOM } from "jsdom";
 import { DLSITE_URL, client, getSessionIDFromConsole } from "./settings";
 import { createChart } from "./createChart";
 import { Product, Categories } from "./types";
+
+const isExistDir = (dirPath: string): boolean => {
+  try {
+    statSync(dirPath)
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
 
 const getCategories = async (url: string): Promise<string[]> => {
   console.log(`${url}を取得中....`);
@@ -43,7 +52,7 @@ const main = async (): Promise<void> => {
   const categoryRates = await getCategoryRates(workURLs);
 
   const buffer = await createChart(categoryRates);
-  mkdirSync("output");
+  if(!isExistDir("./output")) mkdirSync("output");
   writeFileSync("./output/analyzed.png", buffer);
 
   printCategories(categoryRates);
